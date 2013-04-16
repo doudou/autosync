@@ -1,0 +1,11 @@
+#! /usr/bin/env ruby
+
+require 'autosync'
+
+base_dir = AutoSync.root_dir
+setup = AutoSync::AutoSync.load(base_dir)
+setup.publish
+while true
+    setup.synchronize
+    sleep 1
+end
