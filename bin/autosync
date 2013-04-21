@@ -2,6 +2,8 @@
 
 require 'autosync'
 
+ENV['GIT_SSH'] = File.expand_path('autosync-ssh', File.dirname(__FILE__))
+
 base_dir = AutoSync.root_dir
 setup = AutoSync::AutoSync.load(base_dir)
 while true
