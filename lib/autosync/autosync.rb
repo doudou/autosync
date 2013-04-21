@@ -11,11 +11,13 @@ module AutoSync
 
     # Main handling of an AutoSync setup
     class AutoSync
-        # @return [String] this autosync setup's ID
-        attr_accessor :id
         # @return [Discovery] object that gives access to other autosync
         #   installations through DNS-SD resolution
         attr_accessor :discovery
+        # @return [String] the ID of this repository
+        attr_reader :repo_id
+        # @return [Pathname] The root path of this autosync setup
+        attr_reader :base_dir
 
         # Loads a configuration from a YAML file
         #
@@ -36,18 +38,19 @@ module AutoSync
         # Creates a new AutoSync setup with the given GUID and base directory
         def initialize(base_dir, sync_id, repo_id)
             @base_dir = base_dir
-            @discovery = Discovery.new(sync_id, repo_id)
+            @repo_id = repo_id
+            @discovery = Discovery.new(sync_id)
         end
 
         # Publishes this autosync setup on the local net
         def publish
-            discovery.publish
+            discovery.publish(repo_id, base_dir)
         end
 
         # Handles any autosync setup that can be found on this network and
         # synchronizes the local setup with them
         def synchronize
-            discovery.discover do
+            discovery.discover(repo_id) do
             end
         end
     end

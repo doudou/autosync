@@ -4,16 +4,17 @@ module AutoSync
         # @return [String] the GUID of the autosync installation we are watching
         #   for
         attr_reader :sync_id
-        attr_reader :repo_id
+        attr_reader :targets
 
         # @arg [String] id the directory GUID
-        def initialize(sync_id, repo_id)
-            @sync_id, @repo_id = sync_id, repo_id
+        def initialize(sync_id)
+            @sync_id = sync_id
+            @targets = Hash.new
         end
 
         # Publishes the given autosync ID
-        def publish
-            DNSSD.register! repo_id, "_autosync#{sync_id}._tcp", nil, 22
+        def publish(repo_id, path)
+            DNSSD.register! repo_id, "_autosync#{sync_id}._tcp", nil, 22, DNSSD::TextRecord.new("path" => path.to_s)
         end
 
         def self.localhost?(target)
@@ -39,13 +40,15 @@ module AutoSync
         # Discovers all available autosync folders with the given ID
         #
         # @return [Array<String>] list of found host names
-        def discover
+        def discover(self_id)
             DNSSD.browse "_autosync#{sync_id}._tcp" do |browse_r|
                 DNSSD.resolve! browse_r do |r|
-                    p r
-                    yield(r)
+                    if r.name != self_id
+                        targets[r.name] = Host.new(r.target[0..-2], r.name, sync_id, r.text_record['path'])
+                    end
                 end
             end
+            p targets
         end
     end
 end
