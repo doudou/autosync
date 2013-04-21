@@ -41,7 +41,7 @@ module AutoSync
         # @return [Array<String>] list of found host names
         def discover
             DNSSD.browse "_autosync#{sync_id}._tcp" do |browse_r|
-                DNSSD.resolve browse_r do |r|
+                DNSSD.resolve! browse_r do |r|
                     p r
                     yield(r)
                 end
