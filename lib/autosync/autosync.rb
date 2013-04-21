@@ -25,17 +25,18 @@ module AutoSync
         #   given installation
         def self.load(path)
             file = YAML.load((path + "autosync.yml").read)
-            if !file['id']
-                raise ArgumentError, "configuration in #{path} does not contain an ID. This is required"
+            if !file['sync_id']
+                raise ArgumentError, "configuration in #{path} does not contain a sync_id. This is required"
+            elsif !file['repo_id']
+                raise ArgumentError, "configuration in #{path} does not contain a repo_id. This is required"
             end
-            new(path, file['id'].to_s)
+            new(path, file['sync_id'].to_s, file['repo_id'].to_s)
         end
 
         # Creates a new AutoSync setup with the given GUID and base directory
-        def initialize(base_dir, id)
+        def initialize(base_dir, sync_id, repo_id)
             @base_dir = base_dir
-            @id = id
-            @discovery = Discovery.new(id)
+            @discovery = Discovery.new(sync_id, repo_id)
         end
 
         # Publishes this autosync setup on the local net

@@ -3,16 +3,17 @@ module AutoSync
     class Discovery
         # @return [String] the GUID of the autosync installation we are watching
         #   for
-        attr_reader :id
+        attr_reader :sync_id
+        attr_reader :repo_id
 
         # @arg [String] id the directory GUID
-        def initialize(id)
-            @id = id
+        def initialize(sync_id, repo_id)
+            @sync_id, @repo_id = sync_id, repo_id
         end
 
         # Publishes the given autosync ID
         def publish
-            DNSSD.register! id, "_autosync._tcp", nil, 22
+            DNSSD.register! repo_id, "_autosync#{sync_id}._tcp", nil, 22
         end
 
         def self.localhost?(target)
@@ -39,9 +40,11 @@ module AutoSync
         #
         # @return [Array<String>] list of found host names
         def discover
-            DNSSD.resolve id, "_autosync._tcp", "local" do |r|
-                p r
-                yield(r)
+            DNSSD.browse "_autosync#{sync_id}._tcp" do |browse_r|
+                DNSSD.resolve browse_r do |r|
+                    p r
+                    yield(r)
+                end
             end
         end
     end
